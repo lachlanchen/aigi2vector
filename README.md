@@ -68,6 +68,12 @@ To render each slide to `page1.png`, `page2.png`, ... you need LibreOffice (`sof
 bash scripts/render_pptx_slides.sh /path/to/file.pptx /path/to/output_dir
 ```
 
+Or use the Python renderer (also uses LibreOffice, then converts PDF pages to PNG):
+
+```bash
+python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dpi 200
+```
+
 ## License
 
 MIT

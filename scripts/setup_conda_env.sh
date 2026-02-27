@@ -11,7 +11,7 @@ fi
 
 conda create -y -n "$ENV_NAME" python="$PY_VER"
 conda run -n "$ENV_NAME" python -m pip install --upgrade pip
-conda run -n "$ENV_NAME" python -m pip install python-pptx
+conda run -n "$ENV_NAME" python -m pip install python-pptx pymupdf
 
 echo "Environment '$ENV_NAME' created."
 echo "Activate with: conda activate $ENV_NAME"
