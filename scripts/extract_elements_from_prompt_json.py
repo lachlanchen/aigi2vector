@@ -51,13 +51,17 @@ def image_to_data_url(path: Path) -> str:
     return f"data:{mime};base64,{b64}"
 
 
-def request_json(url: str, payload: Dict[str, Any], api_key: str) -> Dict[str, Any]:
+def request_raw(url: str, payload: Dict[str, Any], api_key: str) -> str:
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=body, method="POST")
     req.add_header("Content-Type", "application/json")
     req.add_header("Authorization", f"Bearer {api_key}")
     with urllib.request.urlopen(req, timeout=600) as resp:
         raw = resp.read().decode("utf-8", errors="ignore")
+    return raw
+
+
+def parse_json(raw: str) -> Dict[str, Any]:
     try:
         return json.loads(raw)
     except Exception:
@@ -90,10 +94,11 @@ def poll_result(host: str, task_id: str, api_key: str, interval: float, timeout_
     payload = {"id": task_id}
     start = time.time()
     while True:
-        result = request_json(url, payload, api_key)
+        raw = request_raw(url, payload, api_key)
+        result = parse_json(raw)
         status = result.get("status") or (result.get("data") or {}).get("status")
         if verbose:
-            print(f"poll status={status} id={task_id}", flush=True)
+            print(f"poll status={status} id={task_id} response={json.dumps(result, ensure_ascii=False)}", flush=True)
         if status in {"succeeded", "failed"}:
             return result
         if time.time() - start > timeout_s:
@@ -122,6 +127,9 @@ def main() -> None:
     prompts = data.get("prompts", [])
     if not prompts:
         raise RuntimeError("No prompts found in JSON")
+
+    log_dir = output_dir / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
 
     img_data_url = image_to_data_url(image_path)
     url = args.host.rstrip("/") + "/v1/draw/nano-banana"
@@ -154,13 +162,20 @@ def main() -> None:
             if args.verbose:
                 print(f"[{idx}] attempt {attempt+1} sending request...", flush=True)
             try:
-                result = request_json(url, payload, api_key)
+                if args.verbose:
+                    print(f"[{idx}] sending payload size={len(json.dumps(payload))} bytes", flush=True)
+                raw = request_raw(url, payload, api_key)
+                result = parse_json(raw)
             except Exception as exc:
                 last_err = f"{type(exc).__name__}: {exc}"
                 if args.verbose:
                     print(f"[{idx}] attempt {attempt+1} error: {last_err}", flush=True)
                 time.sleep(2.0 + attempt * 1.5)
                 continue
+            if args.verbose:
+                print(f"[{idx}] initial response: {json.dumps(result, ensure_ascii=False)}", flush=True)
+            # Persist raw response for debugging
+            (log_dir / f"resp_{idx:03d}.raw.txt").write_text(raw, encoding="utf-8")
             if not args.no_poll:
                 task_id = result.get("id") or (result.get("data") or {}).get("id")
                 if not task_id:
@@ -170,6 +185,7 @@ def main() -> None:
                     time.sleep(1.5 + attempt * 1.5)
                     continue
                 final = poll_result(args.host, task_id, api_key, args.poll_interval, args.poll_timeout, args.verbose)
+                (log_dir / f"poll_{idx:03d}.json").write_text(json.dumps(final, ensure_ascii=False, indent=2), encoding="utf-8")
                 results = final.get("results") or (final.get("data") or {}).get("results") or []
                 if results and results[0].get("url"):
                     download_file(results[0]["url"], out_image)
