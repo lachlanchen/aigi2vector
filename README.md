@@ -60,6 +60,14 @@ python scripts/extract_pptx_images.py /path/to/file.pptx /path/to/output_dir
 
 Add `--dedupe` to skip duplicate images across slides. Add `--png` to save files as `p{slide}image{index}.png`.
 
+### Render Slides to Images
+
+To render each slide to `page1.png`, `page2.png`, ... you need LibreOffice (`soffice`) installed:
+
+```bash
+bash scripts/render_pptx_slides.sh /path/to/file.pptx /path/to/output_dir
+```
+
 ## License
 
 MIT
