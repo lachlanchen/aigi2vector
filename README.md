@@ -58,7 +58,7 @@ conda activate aigi2vector-pptx
 python scripts/extract_pptx_images.py /path/to/file.pptx /path/to/output_dir
 ```
 
-Add `--dedupe` to skip duplicate images across slides.
+Add `--dedupe` to skip duplicate images across slides. Add `--png` to save files as `p{slide}image{index}.png`.
 
 ## License
 

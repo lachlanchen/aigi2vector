@@ -3,9 +3,10 @@
 
 import argparse
 import hashlib
-import os
+import io
 from pathlib import Path
 
+from PIL import Image
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
@@ -24,6 +25,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip duplicate images (by SHA1 hash)",
     )
+    parser.add_argument(
+        "--png",
+        action="store_true",
+        help="Convert and save images as PNG",
+    )
     return parser.parse_args()
 
 
@@ -36,9 +42,21 @@ def write_image(
     slide_idx: int,
     image_idx: int,
     image,
+    as_png: bool,
 ) -> Path:
+    if as_png:
+        filename = f"p{slide_idx}image{image_idx}.png"
+        out_path = out_dir / filename
+        try:
+            with Image.open(io.BytesIO(image.blob)) as im:
+                im.save(out_path, format="PNG")
+            return out_path
+        except Exception:
+            # Fall back to original bytes if conversion fails
+            pass
+
     ext = image.ext
-    filename = f"slide-{slide_idx:03d}_image-{image_idx:02d}.{ext}"
+    filename = f"p{slide_idx}image{image_idx}.{ext}"
     out_path = out_dir / filename
     with open(out_path, "wb") as f:
         f.write(image.blob)
@@ -71,7 +89,7 @@ def main() -> None:
                     continue
                 seen.add(digest)
             image_i += 1
-            write_image(out_dir, slide_i, image_i, image)
+            write_image(out_dir, slide_i, image_i, image, args.png)
             total += 1
 
     print(f"Extracted {total} images to {out_dir}")
