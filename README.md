@@ -48,6 +48,18 @@ python aigi2vector.py input.png output.svg --mode binary --threshold 140 --inver
 - The output SVG uses the input pixel dimensions. Scale in your vector editor if needed.
 - For best results, start with a high-contrast image.
 
+## PPTX Image Extraction
+
+If you need to extract embedded images from a `.pptx` (e.g., one or two images per slide), use:
+
+```bash
+bash scripts/setup_conda_env.sh
+conda activate aigi2vector-pptx
+python scripts/extract_pptx_images.py /path/to/file.pptx /path/to/output_dir
+```
+
+Add `--dedupe` to skip duplicate images across slides.
+
 ## License
 
 MIT
