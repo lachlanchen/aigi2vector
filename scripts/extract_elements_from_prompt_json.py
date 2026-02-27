@@ -27,6 +27,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--no-poll", action="store_true", help="Disable polling mode")
     p.add_argument("--poll-interval", type=float, default=3.0, help="Polling interval seconds")
     p.add_argument("--poll-timeout", type=float, default=600.0, help="Polling timeout seconds")
+    p.add_argument(
+        "--stalled-timeout",
+        type=float,
+        default=120.0,
+        help="Fail and retry if poll status/progress does not change for this many seconds",
+    )
+    p.add_argument("--resume", action="store_true", help="Skip existing output files")
     p.add_argument("--verbose", action="store_true", help="Verbose logging")
     return p.parse_args()
 
@@ -38,6 +45,26 @@ def sanitize(text: str) -> str:
     text = re.sub(r"[^a-z0-9_-]+", "_", text)
     text = re.sub(r"_+", "_", text).strip("_")
     return text or "none"
+
+
+ALLOWED_ASPECTS = {
+    "auto",
+    "1:1",
+    "16:9",
+    "9:16",
+    "4:3",
+    "3:4",
+    "3:2",
+    "2:3",
+    "5:4",
+    "4:5",
+    "21:9",
+}
+
+
+def pick_aspect(item: Dict[str, Any], default_aspect: str) -> str:
+    raw = str(item.get("aspect_ratio", default_aspect)).strip()
+    return raw if raw in ALLOWED_ASPECTS else default_aspect
 
 
 def image_to_data_url(path: Path) -> str:
@@ -84,25 +111,55 @@ def parse_json(raw: str) -> Dict[str, Any]:
     return last_obj
 
 
-def download_file(url: str, dest: Path) -> None:
-    with urllib.request.urlopen(url, timeout=600) as resp:
-        dest.write_bytes(resp.read())
+def download_file(url: str, dest: Path, retries: int = 3, verbose: bool = False) -> None:
+    last_err: Optional[Exception] = None
+    for i in range(retries + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=600) as resp:
+                dest.write_bytes(resp.read())
+            return
+        except Exception as exc:
+            last_err = exc
+            if verbose:
+                print(f"download attempt {i+1} failed: {exc}", flush=True)
+            time.sleep(1.5 + i)
+    raise RuntimeError(f"Failed to download {url}: {last_err}")
 
 
-def poll_result(host: str, task_id: str, api_key: str, interval: float, timeout_s: float, verbose: bool) -> Dict[str, Any]:
+def poll_result(
+    host: str,
+    task_id: str,
+    api_key: str,
+    interval: float,
+    timeout_s: float,
+    stalled_timeout_s: float,
+    verbose: bool,
+) -> Dict[str, Any]:
     url = host.rstrip("/") + "/v1/draw/result"
     payload = {"id": task_id}
     start = time.time()
+    last_signature: Optional[tuple] = None
+    last_change = start
     while True:
         raw = request_raw(url, payload, api_key)
         result = parse_json(raw)
-        status = result.get("status") or (result.get("data") or {}).get("status")
+        data = result.get("data") or {}
+        status = result.get("status") or data.get("status")
+        progress = result.get("progress")
+        if progress is None:
+            progress = data.get("progress")
+        signature = (status, progress, data.get("start_time"), data.get("end_time"))
+        if signature != last_signature:
+            last_signature = signature
+            last_change = time.time()
         if verbose:
             print(f"poll status={status} id={task_id} response={json.dumps(result, ensure_ascii=False)}", flush=True)
         if status in {"succeeded", "failed"}:
             return result
         if time.time() - start > timeout_s:
             raise RuntimeError(f"Polling timeout after {timeout_s}s for id {task_id}")
+        if time.time() - last_change > stalled_timeout_s:
+            raise RuntimeError(f"Polling stalled for {stalled_timeout_s}s for id {task_id}")
         time.sleep(interval)
 
 
@@ -141,15 +198,20 @@ def main() -> None:
 
         out_image = output_dir / f"{idx:03d}_{pid}_{label}.png"
         out_prompt = output_dir / f"{idx:03d}_{pid}_{label}.prompt.txt"
+        if args.resume and out_image.exists():
+            if args.verbose:
+                print(f"[{idx}/{len(prompts)}] Skip existing {out_image.name}", flush=True)
+            continue
 
         if args.verbose:
             print(f"[{idx}/{len(prompts)}] Requesting {out_image.name}", flush=True)
 
+        aspect = pick_aspect(item, args.aspect)
         payload: Dict[str, Any] = {
             "model": args.model,
             "urls": [img_data_url],
             "prompt": prompt,
-            "aspectRatio": args.aspect,
+            "aspectRatio": aspect,
         }
         if args.image_size:
             payload["imageSize"] = args.image_size
@@ -164,6 +226,7 @@ def main() -> None:
             try:
                 if args.verbose:
                     print(f"[{idx}] sending payload size={len(json.dumps(payload))} bytes", flush=True)
+                    print(f"[{idx}] using aspectRatio={aspect}", flush=True)
                 raw = request_raw(url, payload, api_key)
                 result = parse_json(raw)
             except Exception as exc:
@@ -184,11 +247,19 @@ def main() -> None:
                         print(f"[{idx}] attempt {attempt+1} missing id. Response: {last_err}", flush=True)
                     time.sleep(1.5 + attempt * 1.5)
                     continue
-                final = poll_result(args.host, task_id, api_key, args.poll_interval, args.poll_timeout, args.verbose)
+                final = poll_result(
+                    args.host,
+                    task_id,
+                    api_key,
+                    args.poll_interval,
+                    args.poll_timeout,
+                    args.stalled_timeout,
+                    args.verbose,
+                )
                 (log_dir / f"poll_{idx:03d}.json").write_text(json.dumps(final, ensure_ascii=False, indent=2), encoding="utf-8")
                 results = final.get("results") or (final.get("data") or {}).get("results") or []
                 if results and results[0].get("url"):
-                    download_file(results[0]["url"], out_image)
+                    download_file(results[0]["url"], out_image, retries=3, verbose=args.verbose)
                     out_prompt.write_text(prompt + "\n", encoding="utf-8")
                     if args.verbose:
                         print(f"[{idx}] Saved: {out_image}", flush=True)
@@ -200,7 +271,7 @@ def main() -> None:
             else:
                 results = result.get("results") or []
                 if results and results[0].get("url"):
-                    download_file(results[0]["url"], out_image)
+                    download_file(results[0]["url"], out_image, retries=3, verbose=args.verbose)
                     out_prompt.write_text(prompt + "\n", encoding="utf-8")
                     if args.verbose:
                         print(f"[{idx}] Saved: {out_image}", flush=True)

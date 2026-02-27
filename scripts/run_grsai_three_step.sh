@@ -29,23 +29,38 @@ STEP2_JSONL="$OUT_DIR/logs/02_response.jsonl"
 
 # Step 1: detect main standalone elements and write JSON
 cat > "$STEP1_PROMPT" <<'EOF'
-Task: Analyze the attached image and write a JSON file listing the main standalone visual elements.
+Task: Analyze the attached image and write a JSON file listing self-contained standalone visual elements for downstream redraw extraction.
 
 Write JSON directly to this file path (do NOT output JSON in chat):
 __OUTPUT_PATH__
 
 Rules:
-- Focus on major standalone elements that can be extracted as reusable parts.
-- Prefer larger coherent components (photos, panels, diagrams) rather than tiny subparts.
-- Include key text labels only if they are standalone titles/captions; otherwise omit text-only elements.
-- Provide detailed notes for each element so a follow-up prompt can target it precisely.
+- Segment into self-contained parts that are reusable independently.
+- Do NOT make segments too large (avoid merging unrelated modules).
+- Do NOT make segments too small (avoid tiny fragments that are not independently meaningful).
+- Target 6-10 elements for this image unless the image structure clearly requires fewer/more.
+- Each segment must represent one coherent component only.
+- If two components can stand alone separately, split them.
+- Omit pure text labels/captions; keep focus on visual components.
+- Provide clear include/exclude cues to prevent boundary drift in redraw.
+- Provide normalized bounding boxes to define the intended region precisely.
 - Output JSON only.
 
 Schema:
 {
   "image": {"path": "..."},
+  "segmentation_notes": "brief summary of segmentation strategy",
   "elements": [
-    {"id": "e01", "type": "diagram|photo|panel|icon|chart|table|other", "label": "short name", "notes": "detailed description"}
+    {
+      "id": "e01",
+      "type": "diagram|photo|panel|icon|chart|table|other",
+      "label": "short name",
+      "anchor": "approximate region (top-left/top-center/top-right/middle-left/middle/middle-right/bottom-left/bottom/bottom-right)",
+      "bbox_norm": {"x": 0.12, "y": 0.25, "w": 0.24, "h": 0.33},
+      "notes": "detailed visual description of what is included",
+      "include": ["keyword1", "keyword2"],
+      "exclude": ["nearby object that must not be included", "another nearby object"]
+    }
   ]
 }
 
@@ -71,19 +86,29 @@ Write JSON directly to this file path (do NOT output JSON in chat):
 __OUTPUT_PATH__
 
 Rules for each prompt:
-- Be detailed and specific to the element described in notes.
-- Ask to preserve layout, colors, and geometry from the original image.
-- Require no text in the output.
-- Require a tight framing with no margin and a plain/transparent background.
-- Explicitly state the output must be a redraw (not a crop).
-- Emphasize that anything outside the element is incorrect.
-- Emphasize that the output must match the element as seen in the source image.
+- Be detailed and specific to exactly one element.
+- Use `anchor`, `bbox_norm`, `include`, and `exclude` from the input JSON to define boundaries.
+- Require faithful redraw from source image (not crop, not redesign).
+- Require no text in output.
+- Require zero margin and zero padding; element must fully occupy the canvas.
+- Require the subject to fill >=90% of the output area unless shape inherently needs whitespace.
+- Require that excluded nearby objects are not present.
+- Require unchanged geometry, proportions, orientation, colors, and internal structure.
+- Add explicit failure criteria when output includes extra regions.
+- Add a recommended `aspect_ratio` for each element chosen from:
+  auto, 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3, 5:4, 4:5, 21:9.
+- Prefer choosing aspect ratio from bbox width/height so the element occupies canvas tightly.
 
 Output schema:
 {
   "image": {"path": "..."},
   "prompts": [
-    {"id": "e01", "label": "...", "prompt": "..."}
+    {
+      "id": "e01",
+      "label": "...",
+      "aspect_ratio": "4:3",
+      "prompt": "detailed redraw prompt"
+    }
   ]
 }
 
@@ -100,7 +125,7 @@ echo "[Step 2/3] Generating detailed prompts..."
 codex exec --json --full-auto -m "$MODEL" -c "model_reasoning_effort=\"$REASONING\"" --skip-git-repo-check - < "$STEP2_PROMPT" > "$STEP2_JSONL"
 
 # Step 3: run extraction for each element prompt
-GUARD_PROMPT="You are redrawing a part from the given image. Output must be a faithful redraw, not a crop. Preserve geometry, layout, and visual style. Do NOT add or invent content. Remove ALL text. Output only the requested element with tight framing and no margin or background. If any other region appears, the output is wrong. Keep colors and shapes faithful to the original."
+GUARD_PROMPT="You are redrawing one isolated element from the given image. Redraw only the requested element; do not crop the full image. Preserve exact geometry, proportions, orientation, colors, and internal structure from the source. Do NOT add or invent content. Remove all text. Output must have zero margin and zero padding, with the element fully occupying the canvas. Target >=90% canvas occupancy for the subject unless impossible due to shape. If any excluded neighboring object appears, the output is invalid."
 
 echo "[Step 3/3] Extracting elements via GRS AI..."
 python3 /Users/lachlanchen/Documents/iProjects/aigi2vector/scripts/extract_elements_from_prompt_json.py \
