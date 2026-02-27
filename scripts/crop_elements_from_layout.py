@@ -90,8 +90,8 @@ def main() -> None:
                 notes = sanitize(str(el.get("notes", "")))
 
                 name = (
-                    f"{el_type}_{notes}_x{int(x):04d}_y{int(y):04d}_"
-                    f"w{int(w):04d}_h{int(h):04d}_i{idx:03d}.png"
+                    f"{idx:03d}_{el_type}_x{int(x):04d}_y{int(y):04d}_"
+                    f"{notes}.png"
                 )
 
                 crop = img.crop((x1, y1, x2, y2))
