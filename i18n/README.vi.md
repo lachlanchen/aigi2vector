@@ -8,51 +8,90 @@
 [![Python 3](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
 [![OpenCV](https://img.shields.io/badge/OpenCV-Enabled-5C3EE8.svg)](https://opencv.org/)
 [![NumPy](https://img.shields.io/badge/NumPy-Required-4DABCF.svg)](https://numpy.org/)
+[![Workflow](https://img.shields.io/badge/Workflow-CLI%20%2B%20Scripts-7F3CD9.svg)](#-table-of-contents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 
-Chuyển ảnh raster do AI sinh ra thành các SVG vector sạch để vẽ plot.
+Chuyển đổi hình ảnh raster tạo bởi AI thành SVG vector sạch, phù hợp để vẽ bằng plotter.
 
-Repo này cung cấp một CLI Python phát hiện cạnh hoặc hình dạng nhị phân trong ảnh và xuất chúng dưới dạng đường dẫn SVG. Công cụ được thiết kế cho việc vector hóa phong cách nghệ thuật, thân thiện với máy vẽ đồ họa (plotter), thay vì truy vết ảnh chân thực.
+Kho này cung cấp một CLI Python phát hiện biên hoặc hình dạng nhị phân trong ảnh rồi ghi ra các đường path SVG. Nó được thiết kế cho mục đích vector hóa theo phong cách minh họa, thân thiện với máy plotter hơn là truy vết theo kiểu ảnh thật.
 
-## 🎯 Tóm tắt nhanh
+## 🧰 At a Glance (Quick Matrix)
+
+| Khu vực | Vị trí | Mục đích |
+|---|---|---|
+| Chuyển đổi lõi | [`aigi2vector.py`](aigi2vector.py) | Chuyển ảnh raster/ảnh trích xuất từ PPTX sang SVG |
+| Công cụ PPTX tùy chọn | `scripts/` | Trích xuất và render tài sản slide |
+| Tự động hóa mở rộng | `AutoAppDev/` | Ngăn xếp tự động hóa bên ngoài, tùy chọn |
+
+---
+
+## 📚 Table of Contents
+
+- [At a Glance (Quick Matrix)](#-at-a-glance-quick-matrix)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Project Structure](#-project-structure)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Visual Workflow](#-visual-workflow)
+- [Configuration](#-configuration)
+- [Examples](#-examples)
+- [Development Notes](#-development-notes)
+- [Troubleshooting](#-troubleshooting)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Notes](#-notes)
+- [Support](#️-support)
+- [License](#license)
+
+## 🧭 At a Glance (Quick Map)
+
+| Trường hợp dùng | Điểm vào | Kết quả |
+|---|---|---|
+| Chuyển một ảnh sang SVG | `python aigi2vector.py input.png output.svg` | `output.svg` |
+| Tinh chỉnh chi tiết đầu ra | Tham số CLI trong [`Usage`](#-usage) (`--mode`, `--canny`, `--epsilon`, v.v.) | Đường viền sạch hơn hoặc dày hơn |
+| Xử lý tài nguyên PPTX | Bộ hỗ trợ `scripts/` + môi trường conda tùy chọn | Ảnh đã trích xuất + file PNG slide đã render |
+
+## 🎯 At a Glance
 
 | Lớp | Mô tả | Vị trí |
 |---|---|---|
-| Core CLI | Chuyển ảnh raster thành đường dẫn SVG từ một lệnh duy nhất | [`aigi2vector.py`](aigi2vector.py) |
-| Công cụ PPTX | Trích xuất nội dung slide và render trang cho quy trình vector hóa tiếp theo | `scripts/` |
-| Tự động hóa tùy chọn | Pipeline hỗ trợ AI, trích xuất và ghép nối quy mô lớn | `AutoAppDev/`, `scripts/` |
+| CLI lõi | Chuyển ảnh raster thành đường SVG chỉ bằng một lệnh | [`aigi2vector.py`](aigi2vector.py) |
+| Công cụ PPTX | Trích xuất nội dung slide và render trang để vector hóa tiếp theo | `scripts/` |
+| Tự động hóa tùy chọn | Luồng làm việc lớn hơn cho trích xuất, tái cấu trúc có hỗ trợ AI | `AutoAppDev/`, `scripts/` |
 
-## ✨ Tổng quan
+## ✨ Overview
 
 `aigi2vector` gồm:
 
-- Core CLI raster-to-SVG: [`aigi2vector.py`](aigi2vector.py)
-- Công cụ PPTX tùy chọn để trích xuất ảnh nhúng và render slide sang PNG
-- Script workflow bổ sung trong `scripts/` cho trích xuất bố cục, cắt ảnh và các pipeline có trợ giúp AI
-- Submodule `AutoAppDev/` (công cụ bên ngoài; không bắt buộc cho CLI chính)
+- Một CLI raster-to-SVG lõi: [`aigi2vector.py`](aigi2vector.py)
+- Công cụ PPTX tùy chọn để trích xuất hình ảnh nhúng và render slide sang PNG
+- Các script luồng công việc bổ sung trong `scripts/` cho trích xuất layout, cắt ảnh và pipeline hỗ trợ AI
+- Một submodule `AutoAppDev/` (công cụ bên ngoài; không cần cho CLI chính)
 
 | Mục | Chi tiết |
 |---|---|
-| Mục tiêu chính | Chuyển ảnh raster thành dữ liệu SVG dạng đường dẫn |
-| Chế độ chính | CLI Python một file |
-| Phụ thuộc cốt lõi | `opencv-python`, `numpy` |
-| Workflow tùy chọn | Trích xuất/render PPTX, pipeline script có trợ giúp AI |
+| Mục đích chính | Chuyển ảnh raster thành đầu ra đường path SVG |
+| Chế độ chính | CLI Python một tệp |
+| Phụ thuộc lõi | `opencv-python`, `numpy` |
+| Workflow tùy chọn | Trích xuất/render PPTX, pipeline script AI-assited |
 
-## 🚀 Tính năng
+## 🚀 Features
 
-- Chuyển ảnh raster thành đường dẫn SVG theo hai chế độ:
-  - `edges`: phát hiện cạnh dựa trên Canny
-  - `binary`: trích xuất hình dạng bằng ngưỡng nhị phân
+- Chuyển ảnh raster sang path SVG qua hai chế độ:
+  - `edges`: phát hiện biên dựa trên Canny
+  - `binary`: trích xuất hình dạng theo ngưỡng
 - Điều khiển tiền xử lý:
-  - Gaussian blur (`--blur`)
-  - Đảo ảnh tùy chọn (`--invert`)
-- Đơn giản hóa đường dẫn theo xấp xỉ Douglas-Peucker (`--epsilon`)
-- SVG đầu ra giữ nguyên kích thước pixel đầu vào thông qua `width`, `height` và `viewBox`
-- Tiện ích ảnh PPTX:
-  - Trích xuất ảnh nhúng theo từng slide
-  - Render các trang slide thành `page1.png`, `page2.png`, ...
+  - Làm mờ Gaussian (`--blur`)
+  - Đảo ngược tùy chọn (`--invert`)
+- Rút gọn đường theo xấp xỉ Douglas-Peucker (`--epsilon`)
+- Đầu ra SVG giữ kích thước pixel đầu vào nhờ `width`, `height` và `viewBox`
+- Tiện ích hình ảnh PPTX:
+  - Trích xuất ảnh nhúng theo slide
+  - Render trang slide thành `page1.png`, `page2.png`, ...
 
-## 🗂️ Cấu trúc dự án
+## 🗂️ Project Structure
 
 ```text
 .
@@ -60,8 +99,8 @@ Repo này cung cấp một CLI Python phát hiện cạnh hoặc hình dạng nh
 ├── README.md
 ├── requirements.txt
 ├── AGENTS.md
-├── AutoAppDev/                      # Git submodule (tùy chọn cho CLI cốt lõi)
-├── i18n/                            # Thư mục bản dịch (hiện là scaffold/empty)
+├── AutoAppDev/                      # Git submodule (optional for core CLI)
+├── i18n/                            # Thư mục dịch (hiện tại scaffold/empty)
 └── scripts/
     ├── extract_pptx_images.py
     ├── render_pptx_slides.py
@@ -81,34 +120,34 @@ Repo này cung cấp một CLI Python phát hiện cạnh hoặc hình dạng nh
     └── run_tikz_prompt_pipeline.sh
 ```
 
-## 📦 Điều kiện tiên quyết
+## 📦 Prerequisites
 
-### CLI cốt lõi
+### Core CLI
 
 - Python 3
 - `pip`
-- Các phụ thuộc từ [`requirements.txt`](requirements.txt):
+- Phụ thuộc từ [`requirements.txt`](requirements.txt):
   - `opencv-python`
   - `numpy`
 
-### Công cụ PPTX tùy chọn
+### Optional PPTX Helpers
 
-- Với `scripts/extract_pptx_images.py`:
+- Đối với `scripts/extract_pptx_images.py`:
   - `python-pptx`
   - `Pillow`
-- Với `scripts/render_pptx_slides.py`:
+- Đối với `scripts/render_pptx_slides.py`:
   - LibreOffice (`soffice` hoặc `libreoffice` trong `PATH`)
   - `PyMuPDF` (`fitz`)
-- Thiết lập hỗ trợ tùy chọn:
+- Thiết lập bổ sung tùy chọn:
   - Conda (cho `scripts/setup_conda_env.sh`)
 
-### Pipeline nâng cao tùy chọn
+### Optional Advanced Pipelines
 
-Một số script trong `scripts/` phụ thuộc vào công cụ/dịch vụ bên ngoài (ví dụ CLI `codex` và GRS AI API). Chúng không bắt buộc để chạy `aigi2vector.py`.
+Một số script trong `scripts/` phụ thuộc vào công cụ/dịch vụ bên ngoài (ví dụ `codex` CLI và GRS AI API). Các phần này không bắt buộc và không cần thiết để chạy `aigi2vector.py`.
 
-## 🛠️ Cài đặt
+## 🛠️ Installation
 
-### Bắt đầu nhanh (luồng cơ bản hiện hành)
+### Quick Start (luồng chuẩn hiện tại)
 
 ```bash
 python3 -m venv .venv
@@ -118,77 +157,92 @@ pip install -r requirements.txt
 python aigi2vector.py input.png output.svg
 ```
 
-### Thiết lập Conda tùy chọn cho tiện ích PPTX
+### Optional Conda setup for PPTX utilities
 
 ```bash
 bash scripts/setup_conda_env.sh
 conda activate aigi2vector-pptx
 ```
 
-## ▶️ Cách sử dụng
+## ▶️ Usage
 
 ```bash
 python aigi2vector.py <input_image> <output_svg> [options]
 ```
 
-### Tùy chọn CLI
+### CLI Options
 
-| Option | Mặc định | Mô tả |
+| Tùy chọn | Mặc định | Mô tả |
 |---|---|---|
 | `--mode edges|binary` | `edges` | Chế độ vector hóa |
 | `--canny LOW HIGH` | `100 200` | Ngưỡng thấp/cao cho chế độ edges |
-| `--threshold N` | `128` | Ngưỡng nhị phân dùng trong chế độ `binary` |
-| `--invert` | off | Đảo màu đen/trắng trước khi phát hiện contour |
-| `--blur K` | `3` | Kích thước kernel Gaussian blur (số lẻ) |
-| `--epsilon E` | `1.5` | Đơn giản hóa đường cong; giá trị cao hơn = ít điểm hơn |
+| `--threshold N` | `128` | Ngưỡng nhị phân dùng trong `binary` |
+| `--invert` | off | Đảo trắng đen trước khi dò contour |
+| `--blur K` | `3` | Kích thước kernel Gaussian (số nguyên lẻ) |
+| `--epsilon E` | `1.5` | Đơn giản hóa đường cong; lớn hơn = ít điểm hơn |
 
-### Chế độ hoạt động
+### How Modes Work
 
-- `edges` dùng phát hiện cạnh Canny và theo dõi contour bên ngoài.
-- `binary` ngưỡng hóa ảnh xám rồi theo dõi contour ngoài của mask kết quả.
+- Chế độ `edges` chạy phát hiện biên Canny và truy vết các contour bên ngoài.
+- Chế độ `binary` ngưỡng hóa ảnh xám rồi truy vết contour bên ngoài của mask kết quả.
 
-## ⚙️ Cấu hình
+## 🔧 Visual Workflow
 
-### Tinh chỉnh tham số CLI chính
+```text
+Input image/PPTX slide assets
+   |
+   v
+`aigi2vector.py` (CLI) ---> `scripts/` (optional)
+   |
+   v
+Raster tracing + contour simplification
+   |
+   v
+SVG output
+```
+
+## ⚙️ Configuration
+
+### Main CLI parameter tuning
 
 - `--canny LOW HIGH`:
-  - Giá trị thấp giữ nhiều chi tiết / nhiễu hơn.
-  - Giá trị cao cho ra contour sạch hơn nhưng có thể thưa hơn.
+  - Giá trị thấp giữ nhiều chi tiết/nhiễu hơn.
+  - Giá trị cao cho ra đường viền sạch hơn nhưng có thể thưa hơn.
 - `--threshold` (binary mode):
-  - Ngưỡng thấp giữ nhiều vùng sáng làm foreground hơn.
-  - Ngưỡng cao giữ chủ yếu vùng tối và tương phản cao.
+  - Ngưỡng thấp giữ thêm vùng sáng thành tiền cảnh.
+  - Ngưỡng cao giữ chủ yếu vùng tối/độ tương phản cao.
 - `--blur`:
-  - Tự động chuẩn hóa thành kernel dương và lẻ.
-  - Giá trị lớn làm mượt nhiễu trước khi phát hiện contour.
+  - Tự động chuẩn hóa thành kernel lẻ dương phía trong.
+  - Giá trị lớn hơn làm mượt nhiễu trước khi dò contour.
 - `--epsilon`:
-  - Giá trị lớn đơn giản hóa đường dẫn mạnh hơn (ít điểm hơn).
-  - Giá trị nhỏ giữ chi tiết hình dạng tốt hơn.
+  - Giá trị lớn rút gọn path mạnh hơn (ít điểm hơn).
+  - Giá trị nhỏ giữ lại chi tiết hình dạng tốt hơn.
 
-### Biến môi trường (script nâng cao)
+### Environment variables (advanced scripts)
 
-- `GRSAI` cần cho các script trích xuất GRS AI (ví dụ `extract_part_grsai.py`, `extract_elements_grsai_pipeline.py`, `extract_elements_from_prompt_json.py`).
+- `GRSAI` là biến bắt buộc cho các script trích xuất GRS AI (ví dụ `extract_part_grsai.py`, `extract_elements_grsai_pipeline.py`, `extract_elements_from_prompt_json.py`).
 
-Lưu ý giả định: các script nâng cao phụ thuộc môi trường riêng và một phần chưa được tài liệu hóa đầy đủ trong README gốc hiện tại; lệnh dưới đây giữ đúng hành vi theo repository nhưng không đảm bảo tính tương thích trên mọi máy.
+Lưu ý giả định: các script nâng cao phụ thuộc môi trường và tài liệu hiện tại chỉ ghi một phần; các lệnh dưới đây giữ đúng hành vi repository nhưng chưa đảm bảo khả năng dùng trên mọi máy.
 
-## 🧪 Ví dụ
+## 🧪 Examples
 
-### Raster -> SVG
+### Raster to SVG
 
-Edges (tốt cho line art):
+Edges (phù hợp cho line art):
 
 ```bash
 python aigi2vector.py input.png output.svg --mode edges --canny 80 180 --epsilon 2.0
 ```
 
-Binary shapes (tốt cho logo / flat art):
+Binary shapes (phù hợp cho logo / flat art):
 
 ```bash
 python aigi2vector.py input.png output.svg --mode binary --threshold 140 --invert
 ```
 
-### Trích xuất ảnh từ PPTX
+### PPTX image extraction
 
-Nếu bạn cần trích xuất ảnh nhúng từ file `.pptx` (ví dụ một hoặc hai ảnh mỗi slide), hãy dùng:
+Nếu bạn cần trích xuất ảnh nhúng từ một file `.pptx` (ví dụ một hoặc hai ảnh mỗi slide), dùng:
 
 ```bash
 bash scripts/setup_conda_env.sh
@@ -196,9 +250,9 @@ conda activate aigi2vector-pptx
 python scripts/extract_pptx_images.py /path/to/file.pptx /path/to/output_dir
 ```
 
-Thêm `--dedupe` để bỏ qua ảnh trùng lặp giữa các slide. Thêm `--png` để lưu file là `p{slide}image{index}.png`.
+Thêm `--dedupe` để bỏ qua ảnh trùng lặp giữa các slide. Thêm `--png` để lưu file dưới dạng `p{slide}image{index}.png`.
 
-### Render slides thành ảnh
+### Render slides to images
 
 Để render mỗi slide thành `page1.png`, `page2.png`, ... bạn cần cài LibreOffice (`soffice`):
 
@@ -206,15 +260,15 @@ Thêm `--dedupe` để bỏ qua ảnh trùng lặp giữa các slide. Thêm `--p
 bash scripts/render_pptx_slides.sh /path/to/file.pptx /path/to/output_dir
 ```
 
-Hoặc dùng Python renderer (cũng dùng LibreOffice, sau đó chuyển PDF pages sang PNG):
+Hoặc dùng renderer Python (cũng dùng LibreOffice rồi chuyển PDF sang PNG):
 
 ```bash
 python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dpi 200
 ```
 
-### Workflow nâng cao tùy chọn (scripts)
+### Optional advanced workflows (scripts)
 
-Các script sau có trong repo và có thể dùng cho pipeline phân rã/tái tạo quy mô lớn:
+Các script này có sẵn trong repo và có thể dùng cho pipelines tách/rà soát lớn hơn:
 
 - `scripts/run_grsai_three_step.sh`
 - `scripts/codex_describe_images_to_md.sh`
@@ -222,46 +276,68 @@ Các script sau có trong repo và có thể dùng cho pipeline phân rã/tái t
 - `scripts/codex_extract_layout_elements_v2.sh`
 - `scripts/run_tikz_prompt_pipeline.sh`
 
-Quan trọng: một số script hiện có đường dẫn tuyệt đối phụ thuộc máy và phụ thuộc dịch vụ ngoài; hãy chỉnh lại trước khi đưa vào sản xuất.
+Quan trọng: một số script hiện có chứa đường dẫn tuyệt đối theo máy và phụ thuộc dịch vụ bên ngoài; hãy điều chỉnh trước khi dùng trong môi trường production.
 
-## 🧰 Ghi chú phát triển
+## 🛠️ Development Notes
 
-- Triển khai chính là một CLI Python duy nhất: [`aigi2vector.py`](aigi2vector.py)
-- Giữ tên hàm/biến theo `snake_case`, hằng số theo `UPPER_SNAKE_CASE`
-- Ưu tiên hàm nhỏ, dễ kiểm thử thay vì khối mã lớn
+- Cách triển khai chính là một CLI Python một tệp: [`aigi2vector.py`](aigi2vector.py)
+- Giữ tên hàm/biến dạng `snake_case`, hằng số dạng `UPPER_SNAKE_CASE`
+- Ưu tiên hàm nhỏ, dễ test hơn các khối khổng lồ
 - Hiện chưa có bộ test chính thức
-- `AIGI/` bị bỏ qua bởi git và dành cho tài sản cục bộ
+- `AIGI/` bị bỏ qua trong git và dùng cho asset cục bộ
 
-## 🛟 Xử lý sự cố
+## 🛟 Troubleshooting
 
-- `FileNotFoundError` với ảnh/PPTX đầu vào:
-  - Kiểm tra xem đường dẫn đầu vào có đúng và có quyền đọc.
+- `FileNotFoundError` với ảnh đầu vào/PPTX:
+  - Kiểm tra đường dẫn đầu vào có đúng và có thể đọc.
 - `Could not read image`:
-  - Xác nhận định dạng tệp được OpenCV hỗ trợ và tệp không bị hỏng.
-- SVG đầu ra rỗng hoặc kém chất lượng:
+  - Kiểm tra định dạng tệp được OpenCV hỗ trợ và file không bị hỏng.
+- SVG đầu ra trống hoặc kém:
   - Thử `--mode binary` với `--threshold` đã tinh chỉnh.
-  - Điều chỉnh ngưỡng `--canny` trong chế độ `edges`.
+  - Điều chỉnh ngưỡng `--canny` ở chế độ `edges`.
   - Giảm `--epsilon` để giữ nhiều điểm contour hơn.
-  - Bắt đầu từ ảnh nguồn có độ tương phản cao hơn.
+  - Bắt đầu từ ảnh nguồn có độ tương phản cao.
 - `LibreOffice (soffice) not found in PATH`:
-  - Cài LibreOffice và đảm bảo `soffice` hoặc `libreoffice` có trong shell của bạn.
-- Thiếu gói Python cho các luồng script:
-  - Cài các phụ thuộc cần thiết cho script đó (`python-pptx`, `Pillow`, `PyMuPDF`, v.v.).
+  - Cài LibreOffice và đảm bảo `soffice` hoặc `libreoffice` có trong `PATH` shell.
+- Thiếu gói Python cho luồng script:
+  - Cài đủ dependency cho luồng script đó (`python-pptx`, `Pillow`, `PyMuPDF`, v.v.).
 - Script GRS AI lỗi xác thực:
   - Xuất khóa của bạn, ví dụ: `export GRSAI=...`.
 
-## 🗺️ Lộ trình
+## 🗺️ Roadmap
 
-Các cải tiến dự kiến:
+Các hướng cải tiến tiềm năng:
 
 - Thêm test tự động trong `tests/` với ảnh mẫu xác định
-- Phát hành nhóm phụ thuộc tùy chọn thống nhất cho workflow script
-- Cải thiện khả năng di động của các pipeline shell nâng cao (loại bỏ đường dẫn tuyệt đối hardcode)
-- Thêm ví dụ input/output tham chiếu dưới dạng tài nguyên mẫu có phiên bản
-- Bổ sung các bản README dịch đã được duy trì trong `i18n/`
+- Công bố dependency nhóm thống nhất cho các workflow script
+- Tăng tính di động của các pipeline shell nâng cao (loại bỏ đường dẫn tuyệt đối hard-code)
+- Thêm ví dụ input/output tham chiếu dưới assets mẫu versioned
+- Bổ sung và duy trì các README dịch trong `i18n/`
+
+## 🤝 Contributing
+
+Đóng góp luôn được hoan nghênh.
+
+Quy trình gợi ý:
+
+1. Fork hoặc tạo nhánh từ mainline hiện tại.
+2. Giữ thay đổi tập trung và dùng commit message ngắn, dạng mệnh lệnh.
+3. Chạy các lệnh liên quan tới phần bạn thay đổi (đường dẫn CLI/script) và xác nhận đầu ra.
+4. Cập nhật phần ghi chú sử dụng trong README khi hành vi thay đổi.
+
+Nếu bạn thêm test, đặt vào `tests/` và đặt tên `test_*.py`.
+
+## 📝 Notes
+
+- SVG đầu ra dùng kích thước pixel đầu vào. Scale trong phần mềm vector nếu cần.
+- Để có kết quả tốt nhất, nên bắt đầu từ ảnh có độ tương phản cao.
 
 ## ❤️ Support
 
 | Donate | PayPal | Stripe |
-|---|---|---|
-| [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
+| --- | --- | --- |
+| [![Donate](https://camo.githubusercontent.com/24a4914f0b42c6f435f9e101621f1e52535b02c225764b2f6cc99416926004b7/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f446f6e6174652d4c617a79696e674172742d3045413545393f7374796c653d666f722d7468652d6261646765266c6f676f3d6b6f2d6669266c6f676f436f6c6f723d7768697465)](https://chat.lazying.art/donate) | [![PayPal](https://camo.githubusercontent.com/d0f57e8b016517a4b06961b24d0ca87d62fdba16e18bbdb6aba28e978dc0ea21/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50617950616c2d526f6e677a686f754368656e2d3030343537433f7374796c653d666f722d7468652d6261646765266c6f676f3d70617970616c266c6f676f436f6c6f723d7768697465)](https://paypal.me/RongzhouChen) | [![Stripe](https://camo.githubusercontent.com/1152dfe04b6943afe3a8d2953676749603fb9f95e24088c92c97a01a897b4942/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f5374726970652d446f6e6174652d3633354246463f7374796c653d666f722d7468652d6261646765266c6f676f3d737472697065266c6f676f436f6c6f723d7768697465)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
+
+## License
+
+MIT

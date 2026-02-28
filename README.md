@@ -1,6 +1,8 @@
 [English](README.md) · [العربية](i18n/README.ar.md) · [Español](i18n/README.es.md) · [Français](i18n/README.fr.md) · [日本語](i18n/README.ja.md) · [한국어](i18n/README.ko.md) · [Tiếng Việt](i18n/README.vi.md) · [中文 (简体)](i18n/README.zh-Hans.md) · [中文（繁體）](i18n/README.zh-Hant.md) · [Deutsch](i18n/README.de.md) · [Русский](i18n/README.ru.md)
 
 
+
+
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
 # aigi2vector
@@ -8,11 +10,50 @@
 [![Python 3](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
 [![OpenCV](https://img.shields.io/badge/OpenCV-Enabled-5C3EE8.svg)](https://opencv.org/)
 [![NumPy](https://img.shields.io/badge/NumPy-Required-4DABCF.svg)](https://numpy.org/)
+[![Workflow](https://img.shields.io/badge/Workflow-CLI%20%2B%20Scripts-7F3CD9.svg)](#-table-of-contents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 
 Convert AI-generated raster images into clean vector plot SVGs.
 
 This repository provides a Python CLI that detects edges or binary shapes in an image and writes them as SVG paths. It is designed for stylized, plotter-friendly vectorization rather than photorealistic tracing.
+
+## 🧰 At a Glance (Quick Matrix)
+
+| Area | Location | Purpose |
+|---|---|---|
+| Core conversion | [`aigi2vector.py`](aigi2vector.py) | Convert raster/PPTX-extracted images to SVG |
+| Optional PPTX helpers | `scripts/` | Extract and render slide assets |
+| Extended automation | `AutoAppDev/` | Optional external automation stack |
+
+---
+
+## 📚 Table of Contents
+
+- [At a Glance](#-at-a-glance-quick-map)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Project Structure](#-project-structure)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Visual Workflow](#-visual-workflow)
+- [Configuration](#-configuration)
+- [Examples](#-examples)
+- [Development Notes](#-development-notes)
+- [Troubleshooting](#-troubleshooting)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Notes](#-notes)
+- [Support](#️-support)
+- [License](#license)
+
+## 🧭 At a Glance (Quick Map)
+
+| Use case | Entry point | Output |
+|---|---|---|
+| Convert one image to SVG | `python aigi2vector.py input.png output.svg` | `output.svg` |
+| Tune output detail | CLI flags in [`Usage`](#-usage) (`--mode`, `--canny`, `--epsilon`, etc.) | Cleaner or denser contours |
+| Process PPTX assets | `scripts/` helpers + optional conda env | Extracted images + rendered slide PNGs |
 
 ## 🎯 At a Glance
 
@@ -146,6 +187,21 @@ python aigi2vector.py <input_image> <output_svg> [options]
 
 - `edges` mode runs Canny edge detection and traces external contours.
 - `binary` mode thresholds grayscale pixels and traces external contours of the resulting mask.
+
+## 🔧 Visual Workflow
+
+```text
+Input image/PPTX slide assets
+   |
+   v
+`aigi2vector.py` (CLI) ---> `scripts/` (optional)
+   |
+   v
+Raster tracing + contour simplification
+   |
+   v
+SVG output
+```
 
 ## ⚙️ Configuration
 
@@ -281,8 +337,8 @@ If you add tests, place them under `tests/` and name files `test_*.py`.
 ## ❤️ Support
 
 | Donate | PayPal | Stripe |
-|---|---|---|
-| [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
+| --- | --- | --- |
+| [![Donate](https://camo.githubusercontent.com/24a4914f0b42c6f435f9e101621f1e52535b02c225764b2f6cc99416926004b7/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f446f6e6174652d4c617a79696e674172742d3045413545393f7374796c653d666f722d7468652d6261646765266c6f676f3d6b6f2d6669266c6f676f436f6c6f723d7768697465)](https://chat.lazying.art/donate) | [![PayPal](https://camo.githubusercontent.com/d0f57e8b016517a4b06961b24d0ca87d62fdba16e18bbdb6aba28e978dc0ea21/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50617950616c2d526f6e677a686f754368656e2d3030343537433f7374796c653d666f722d7468652d6261646765266c6f676f3d70617970616c266c6f676f436f6c6f723d7768697465)](https://paypal.me/RongzhouChen) | [![Stripe](https://camo.githubusercontent.com/1152dfe04b6943afe3a8d2953676749603fb9f95e24088c92c97a01a897b4942/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f5374726970652d446f6e6174652d3633354246463f7374796c653d666f722d7468652d6261646765266c6f676f3d737472697065266c6f676f436f6c6f723d7768697465)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
 
 ## License
 
