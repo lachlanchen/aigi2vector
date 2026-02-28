@@ -1,6 +1,8 @@
 [English](../README.md) · [العربية](README.ar.md) · [Español](README.es.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Tiếng Việt](README.vi.md) · [中文 (简体)](README.zh-Hans.md) · [中文（繁體）](README.zh-Hant.md) · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
 
+[![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
+
 # aigi2vector
 
 [![Python 3](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
@@ -10,37 +12,45 @@
 
 AI 生成のラスター画像を、クリーンなベクターパス SVG に変換します。
 
-このリポジトリは、画像内のエッジまたは二値形状を検出して SVG パスとして書き出す Python CLI を提供します。写実的なトレースではなく、スタイライズされたプロッターフレンドリーなベクター化を目的としています。
+このリポジトリは、画像内のエッジまたは二値形状を検出して SVG パスとして書き出す Python CLI を提供します。フォトリアリスティックなトレースではなく、スタイライズされたプロッター向けベクター化を想定しています。
+
+## 🎯 概要
+
+| レイヤー | 説明 | 場所 |
+|---|---|---|
+| コア CLI | 1 回のコマンドでラスター画像を SVG パスに変換 | [`aigi2vector.py`](aigi2vector.py) |
+| PPTX ヘルパー | スライド内容の抽出とレンダリングを行い、下流のベクター化に備える | `scripts/` |
+| 任意の自動化 | AI 支援の抽出・合成などより大きな処理フロー | `AutoAppDev/`, `scripts/` |
 
 ## ✨ 概要
 
-`aigi2vector` には次が含まれます:
+`aigi2vector` には以下が含まれます。
 
-- ラスターから SVG へ変換するコア CLI: [`aigi2vector.py`](aigi2vector.py)
-- 埋め込み画像の抽出やスライドの PNG レンダリングを行う任意の PPTX 補助ツール
-- レイアウト抽出、クロップ、AI 支援パイプライン向けの追加ワークフロースクリプト（`scripts/` 配下）
-- `AutoAppDev/` サブモジュール（外部ツール。メイン CLI の実行には不要）
+- コアのラスター→SVG CLI: [`aigi2vector.py`](aigi2vector.py)
+- 埋め込み画像を抽出し、スライドを PNG でレンダリングする任意 PPTX ヘルパー
+- レイアウト抽出、切り抜き、AI 支援パイプライン用の追加ワークフロースクリプト（`scripts/` 配下）
+- `AutoAppDev/` サブモジュール（外部ツール。メイン CLI には不要）
 
 | 項目 | 詳細 |
 |---|---|
-| コアの目的 | ラスター画像を SVG パス出力へ変換 |
+| コア目的 | ラスター画像を SVG パスとして出力 |
 | 主な実行形態 | 単一ファイルの Python CLI |
 | コア依存関係 | `opencv-python`, `numpy` |
 | 任意ワークフロー | PPTX 抽出/レンダリング、AI 支援スクリプトパイプライン |
 
-## 🚀 機能
+## 🚀 特徴
 
-- 2 つのモードでラスター画像を SVG パスへ変換:
+- ラスター画像を SVG パスへ変換する 2 つのモードを提供します。
   - `edges`: Canny ベースのエッジ検出
   - `binary`: 閾値処理による形状抽出
-- 前処理オプション:
-  - ガウシアンブラー（`--blur`）
-  - 任意の反転（`--invert`）
-- Douglas-Peucker 近似によるパス簡略化（`--epsilon`）
-- `width`、`height`、`viewBox` により入力ピクセル寸法を保持する SVG 出力
+- 前処理コントロール:
+  - ガウシアンぼかし (`--blur`)
+  - 反転の有無 (`--invert`)
+- Douglas-Peucker 近似 (`--epsilon`) によるパス簡略化
+- `width`、`height`、`viewBox` を使って入力ピクセル寸法を保持した SVG を出力
 - PPTX 画像ユーティリティ:
-  - スライド単位で埋め込み画像を抽出
-  - スライドページを `page1.png`, `page2.png`, ... にレンダリング
+  - スライドごとに埋め込み画像を抽出
+  - `page1.png`, `page2.png`, ... のようにスライドページをレンダリング
 
 ## 🗂️ プロジェクト構成
 
@@ -81,20 +91,20 @@ AI 生成のラスター画像を、クリーンなベクターパス SVG に変
   - `opencv-python`
   - `numpy`
 
-### 任意の PPTX 補助ツール
+### 任意の PPTX ヘルパー
 
-- `scripts/extract_pptx_images.py` の実行に必要:
+- `scripts/extract_pptx_images.py` 用:
   - `python-pptx`
   - `Pillow`
-- `scripts/render_pptx_slides.py` の実行に必要:
-  - LibreOffice（`soffice` または `libreoffice` が `PATH` 上にあること）
+- `scripts/render_pptx_slides.py` 用:
+  - LibreOffice（`PATH` 上の `soffice` か `libreoffice`）
   - `PyMuPDF`（`fitz`）
-- 任意の補助セットアップ:
+- 任意のヘルパー設定:
   - Conda（`scripts/setup_conda_env.sh` 用）
 
 ### 任意の高度なパイプライン
 
-`scripts/` 配下のいくつかのスクリプトは外部ツール/サービス（例: `codex` CLI や GRS AI API）に依存します。これらは任意であり、`aigi2vector.py` の実行には不要です。
+`scripts/` 配下のいくつかのスクリプトは外部ツール/サービス（例: `codex` CLI や GRS AI API）に依存します。これは任意で、`aigi2vector.py` の実行には不要です。
 
 ## 🛠️ インストール
 
@@ -108,7 +118,7 @@ pip install -r requirements.txt
 python aigi2vector.py input.png output.svg
 ```
 
-### PPTX ユーティリティ向け任意の Conda セットアップ
+### PPTX ユーティリティ向け任意 Conda セットアップ
 
 ```bash
 bash scripts/setup_conda_env.sh
@@ -126,51 +136,51 @@ python aigi2vector.py <input_image> <output_svg> [options]
 | オプション | デフォルト | 説明 |
 |---|---|---|
 | `--mode edges|binary` | `edges` | ベクター化モード |
-| `--canny LOW HIGH` | `100 200` | `edges` モード用の低/高しきい値 |
+| `--canny LOW HIGH` | `100 200` | `edges` モードの low/high しきい値 |
 | `--threshold N` | `128` | `binary` モードで使う二値化しきい値 |
 | `--invert` | off | 輪郭検出前に白黒を反転 |
-| `--blur K` | `3` | ガウシアンブラーのカーネルサイズ（奇数） |
-| `--epsilon E` | `1.5` | 曲線の簡略化。大きいほど点数が減る |
+| `--blur K` | `3` | ガウシアンぼかしのカーネルサイズ（奇数） |
+| `--epsilon E` | `1.5` | 曲線の簡略化。大きいほど点数が少なくなります |
 
-### モードの動作
+### モードの仕組み
 
-- `edges` モードは Canny エッジ検出を実行し、外側輪郭をトレースします。
-- `binary` モードはグレースケールを二値化し、得られたマスクの外側輪郭をトレースします。
+- `edges` モードは Canny エッジ検出を実行し、外側の輪郭をトレースします。
+- `binary` モードはグレースケール画像を二値化し、結果マスクの外側輪郭をトレースします。
 
 ## ⚙️ 設定
 
 ### メイン CLI パラメータの調整
 
 - `--canny LOW HIGH`:
-  - 値を下げると、より多くの細部/ノイズを拾います。
-  - 値を上げると、輪郭はよりクリーンになりますが疎になる場合があります。
+  - 値を下げると細部（とノイズ）を多く拾います。
+  - 値を上げると輪郭がクリーンになりますが、場合によっては疎になります。
 - `--threshold`（binary モード）:
-  - 低いしきい値では、明るい領域も前景として残りやすくなります。
-  - 高いしきい値では、暗部/高コントラスト領域が主に残ります。
+  - 低いしきい値では明るい領域も前景として残りやすくなります。
+  - 高いしきい値では暗部や高コントラスト領域が主に残ります。
 - `--blur`:
-  - 内部的に正の奇数カーネルへ自動正規化されます。
-  - 大きい値ほど輪郭検出前にノイズを平滑化します。
+  - 内部で正の奇数カーネルに自動正規化されます。
+  - 大きい値は輪郭検出前のノイズをより滑らかにします。
 - `--epsilon`:
-  - 大きい値ほどパスを強く簡略化します（点が少ない）。
-  - 小さい値ほど形状の細部を保持します。
+  - 大きい値ほどパスをより強く簡略化し、点数が少なくなります。
+  - 小さい値ほど形状の細部が維持されます。
 
 ### 環境変数（高度なスクリプト）
 
-- `GRSAI` は GRS AI 抽出スクリプト（例: `extract_part_grsai.py`, `extract_elements_grsai_pipeline.py`, `extract_elements_from_prompt_json.py`）で必要です。
+- `GRSAI` は GRS AI 抽出スクリプトで必要です（例: `extract_part_grsai.py`, `extract_elements_grsai_pipeline.py`, `extract_elements_from_prompt_json.py`）。
 
-注記: 高度なスクリプトは環境依存で、現行 README ベースラインでは一部未文書化です。以下のコマンドはリポジトリ上で正確な挙動を維持していますが、すべてのマシンでの移植性は保証しません。
+前提: 高度なスクリプトは環境依存で、現行 README には一部未整備の部分があります。以下のコマンドはリポジトリ上での実際の挙動を保ちますが、すべての環境での移植性は保証しません。
 
-## 🧪 例
+## 🧪 使用例
 
-### ラスターから SVG
+### ラスター画像から SVG へ
 
-Edges（線画向き）:
+エッジモード（線画に向く）:
 
 ```bash
 python aigi2vector.py input.png output.svg --mode edges --canny 80 180 --epsilon 2.0
 ```
 
-Binary shapes（ロゴ/フラットアート向き）:
+二値モード（ロゴ／フラットアートに向く）:
 
 ```bash
 python aigi2vector.py input.png output.svg --mode binary --threshold 140 --invert
@@ -178,7 +188,7 @@ python aigi2vector.py input.png output.svg --mode binary --threshold 140 --inver
 
 ### PPTX 画像抽出
 
-`.pptx` から埋め込み画像（例: スライドごとに 1〜2 枚）を抽出する場合:
+`.pptx` から埋め込み画像（例: スライドごとに 1〜2 枚）を抽出したい場合:
 
 ```bash
 bash scripts/setup_conda_env.sh
@@ -186,17 +196,17 @@ conda activate aigi2vector-pptx
 python scripts/extract_pptx_images.py /path/to/file.pptx /path/to/output_dir
 ```
 
-スライド間の重複画像をスキップするには `--dedupe` を追加します。`--png` を追加すると `p{slide}image{index}.png` 形式で保存します。
+`--dedupe` を付けるとスライド間の重複画像を除外できます。`--png` を付けると `p{slide}image{index}.png` として保存されます。
 
-### スライドを画像にレンダリング
+### スライドを画像としてレンダリング
 
-各スライドを `page1.png`, `page2.png`, ... にレンダリングするには、LibreOffice（`soffice`）が必要です:
+各スライドを `page1.png`、`page2.png` ... にレンダリングするには、LibreOffice（`soffice`）が必要です:
 
 ```bash
 bash scripts/render_pptx_slides.sh /path/to/file.pptx /path/to/output_dir
 ```
 
-または Python レンダラーを使用します（これも LibreOffice を使用し、その後 PDF ページを PNG に変換）:
+または Python レンダラーを使います（LibreOffice を利用して PDF を PNG に変換します）:
 
 ```bash
 python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dpi 200
@@ -204,7 +214,7 @@ python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dp
 
 ### 任意の高度なワークフロー（scripts）
 
-これらのスクリプトはリポジトリに存在し、より大きな分解/再構成パイプラインに利用できます:
+これらのスクリプトはリポジトリ内にあり、より大規模な分解／再構成パイプラインで利用できます。
 
 - `scripts/run_grsai_three_step.sh`
 - `scripts/codex_describe_images_to_md.sh`
@@ -212,31 +222,31 @@ python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dp
 - `scripts/codex_extract_layout_elements_v2.sh`
 - `scripts/run_tikz_prompt_pipeline.sh`
 
-重要: これらのスクリプトの一部には、現在マシン依存の絶対パスや外部サービス依存が含まれます。本番利用前に調整してください。
+重要: これらの一部のスクリプトは、現在の環境依存の絶対パスや外部サービス依存を含みます。運用前に必ず調整してください。
 
-## 🧰 開発メモ
+## 🧰 開発ノート
 
-- 主実装は単一ファイルの Python CLI: [`aigi2vector.py`](aigi2vector.py)
-- 関数/変数名は `snake_case`、定数は `UPPER_SNAKE_CASE` を維持
-- 巨大な一塊より、小さくテストしやすい関数を優先
-- 現時点では正式なテストスイートは未整備
-- `AIGI/` は git で無視され、ローカル資産向けです
+- メイン実装は単一ファイルの Python CLI です: [`aigi2vector.py`](aigi2vector.py)
+- 関数名・変数名は `snake_case`、定数は `UPPER_SNAKE_CASE` を維持します。
+- 大きな一体型コードより、テストしやすい小さな関数を優先します。
+- 公式なテストスイートは現時点では未整備です。
+- `AIGI/` は git 無視対象で、ローカル資産の保管先です。
 
 ## 🛟 トラブルシューティング
 
-- 入力画像/PPTX で `FileNotFoundError`:
-  - 入力パスが正しく、読み取り可能か確認してください。
+- 入力画像 / PPTX で `FileNotFoundError` が出る:
+  - 入力パスが正しく、読み取り可能であることを確認してください。
 - `Could not read image`:
-  - OpenCV が対応する形式で、ファイルが破損していないか確認してください。
-- SVG 出力が空、または品質が低い:
-  - `--mode binary` を使い、`--threshold` を調整してください。
+  - OpenCV が対応する形式かつ破損していないファイルか確認してください。
+- SVG の出力が空、または品質が悪い:
+  - `--mode binary` を使い `--threshold` を調整してください。
   - `edges` モードで `--canny` のしきい値を調整してください。
-  - `--epsilon` を下げて輪郭点をより多く保持してください。
-  - まず高コントラストな元画像を使ってください。
+  - `--epsilon` を下げると輪郭点がより多く保持されます。
+  - まず高コントラストの元画像から開始してください。
 - `LibreOffice (soffice) not found in PATH`:
-  - LibreOffice をインストールし、`soffice` または `libreoffice` がシェルから見つかるようにしてください。
-- スクリプト実行フローで Python パッケージ不足:
-  - そのスクリプト経路に必要な依存関係（`python-pptx`, `Pillow`, `PyMuPDF` など）をインストールしてください。
+  - LibreOffice をインストールし、`soffice` または `libreoffice` がシェル PATH で見つかるようにしてください。
+- スクリプト実行フローで Python パッケージが不足:
+  - 対象スクリプトの依存をインストールしてください（`python-pptx`、`Pillow`、`PyMuPDF` など）。
 - GRS AI スクリプトが認証エラーで失敗:
   - 例: `export GRSAI=...` のようにキーをエクスポートしてください。
 
@@ -244,29 +254,35 @@ python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dp
 
 今後の改善候補:
 
-- `tests/` 配下に決定論的なサンプル画像を使った自動テストを追加
-- スクリプトワークフロー向けの任意依存関係グループを統一公開
-- 高度なシェルパイプラインの移植性を改善（ハードコードされた絶対パスの削減）
-- バージョン管理されたサンプル資産配下に入出力の参照例を追加
-- `i18n/` に維持管理された翻訳 README バリアントを拡充
+- `tests/` を追加して決定的なサンプル画像で自動テストを実施
+- スクリプトワークフロー向けに依存関係グループを統一公開
+- 高度なシェルパイプラインの移植性改善（ハードコードの絶対パス削減）
+- 参照となる入出力例をバージョン管理されたサンプル資産として追加
+- `i18n/` を保守運用される翻訳 README で充実
 
-## 🤝 コントリビュート
+## 🤝 Contributing
 
-コントリビューションを歓迎します。
+コントリビューションは歓迎します。
 
-推奨プロセス:
+推奨される手順:
 
 1. 現在のメインラインからフォークまたはブランチを作成します。
-2. 変更は一つの目的に絞り、短い命令形コミットメッセージを使ってください。
-3. 変更したコマンド（CLI/スクリプト経路）を実行し、出力を確認してください。
-4. 挙動が変わる場合は README の使用方法メモを更新してください。
+2. 変更は目的を絞り、短く命令形のコミットメッセージを使います。
+3. 変更した CLI/スクリプト系コマンドを実行し、出力を確認します。
+4. 挙動が変わった場合は README の使用メモを更新します。
 
-テストを追加する場合は、`tests/` 配下に配置し、ファイル名は `test_*.py` にしてください。
+テストを追加する場合は、`tests/` 配下に配置し、ファイル名は `test_*.py` とします。
 
-## 📝 注記
+## 📝 Notes
 
-- 出力 SVG は入力ピクセル寸法を使用します。必要に応じてベクターエディタ側でスケールしてください。
-- 最良の結果を得るには、高コントラストな画像から始めてください。
+- 出力 SVG は入力画像のピクセル寸法を使います。必要に応じてベクター編集ソフト側でスケーリングしてください。
+- 最良の結果を得るには、まずコントラストの高い画像を使ってください。
+
+## ❤️ Support
+
+| Donate | PayPal | Stripe |
+|---|---|---|
+| [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
 
 ## License
 

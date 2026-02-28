@@ -1,6 +1,8 @@
 [English](../README.md) · [العربية](README.ar.md) · [Español](README.es.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Tiếng Việt](README.vi.md) · [中文 (简体)](README.zh-Hans.md) · [中文（繁體）](README.zh-Hant.md) · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
 
+[![LazyingArt banner](https://github.com/lachlanchen/lazyingchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
+
 # aigi2vector
 
 [![Python 3](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
@@ -8,39 +10,47 @@
 [![NumPy](https://img.shields.io/badge/NumPy-Required-4DABCF.svg)](https://numpy.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 
-Konvertiere KI-generierte Rasterbilder in saubere Vektor-Plot-SVGs.
+Konvertiere KI-generierte Rasterbilder in saubere Vektor-SVGs.
 
-Dieses Repository stellt eine Python-CLI bereit, die Kanten oder binäre Formen in einem Bild erkennt und als SVG-Pfade ausgibt. Sie ist für stilisierte, plotterfreundliche Vektorisierung statt fotorealistisches Tracing ausgelegt.
+Dieses Repository stellt eine Python-CLI bereit, die Kanten oder Binärformen in einem Bild erkennt und als SVG-Pfade schreibt. Es ist auf stilisierte, plotterfreundliche Vektorisierung ausgelegt statt auf fotorealistischem Tracing.
+
+## 🎯 Kurzüberblick
+
+| Ebene | Beschreibung | Ort |
+|---|---|---|
+| Kern-CLI | Rasterbilder mit einem einzelnen Befehl in SVG-Pfade umwandeln | [`aigi2vector.py`](aigi2vector.py) |
+| PPTX-Hilfswerkzeuge | Folieninhalte extrahieren und Seiten für eine nachgelagerte Vektorisierung rendern | `scripts/` |
+| Optionale Automatisierung | Größere KI-gestützte Extraktions- und Kompositions-Workflows | `AutoAppDev/`, `scripts/` |
 
 ## ✨ Überblick
 
 `aigi2vector` enthält:
 
-- Eine Raster-zu-SVG-CLI als Kern: [`aigi2vector.py`](aigi2vector.py)
-- Optionale PPTX-Helfer zum Extrahieren eingebetteter Bilder und Rendern von Folien zu PNG
-- Zusätzliche Workflow-Skripte unter `scripts/` für Layout-Extraktion, Cropping und KI-gestützte Pipelines
-- Ein `AutoAppDev/`-Submodul (externes Tooling; für die Haupt-CLI nicht erforderlich)
+- Einen zentralen Raster-zu-SVG-CLI: [`aigi2vector.py`](aigi2vector.py)
+- Optionale PPTX-Hilfswerkzeuge zum Extrahieren eingebetteter Bilder und Rendern von Folien zu PNG
+- Zusätzliche Workflow-Skripte unter `scripts/` für Layout-Extraktion, Zuschneiden und KI-gestützte Pipelines
+- Das Untermodul `AutoAppDev/` (externes Tooling; nicht erforderlich für die Haupt-CLI)
 
-| Eintrag | Details |
+| Punkt | Details |
 |---|---|
-| Kernzweck | Rasterbilder in SVG-Pfadausgabe umwandeln |
-| Primärer Modus | Single-File-Python-CLI |
+| Kernzweck | Rasterbilder in SVG-Pfade umwandeln |
+| Primärer Modus | Einzelne Python-CLI-Datei |
 | Kernabhängigkeiten | `opencv-python`, `numpy` |
-| Optionale Workflows | PPTX-Extraktion/-Rendering, KI-gestützte Skript-Pipelines |
+| Optionale Workflows | PPTX-Extraktion/-Rendern, KI-gestützte Script-Pipelines |
 
-## 🚀 Features
+## 🚀 Funktionen
 
-- Konvertierung von Rasterbildern in SVG-Pfade mit zwei Modi:
-  - `edges`: Canny-basierte Kantenerkennung
-  - `binary`: Schwellenwertbasierte Formextraktion
-- Vorverarbeitungsoptionen:
-  - Gaussian Blur (`--blur`)
+- Konvertiere Rasterbilder in SVG-Pfade mit zwei Modi:
+  - `edges`: Kanten­erkennung auf Basis von Canny
+  - `binary`: Formextraktion über Schwellwertsetzung
+- Optionen für die Vorverarbeitung:
+  - Gaußscher Weichzeichner (`--blur`)
   - Optionale Invertierung (`--invert`)
-- Pfadvereinfachung mit Douglas-Peucker-Approximation (`--epsilon`)
-- SVG-Ausgabe, die Pixelmaße der Eingabe über `width`, `height` und `viewBox` beibehält
+- Pfadvereinfachung mit Douglas-Peucker-Näherung (`--epsilon`)
+- SVG-Ausgabe, die die Eingangspixelgröße über `width`, `height` und `viewBox` beibehält
 - PPTX-Bildwerkzeuge:
-  - Eingebettete Bilder folienweise extrahieren
-  - Folienseiten als `page1.png`, `page2.png`, ... rendern
+  - Eingebettete Bilder nach Folien extrahieren
+  - Seiten als `page1.png`, `page2.png`, ... rendern
 
 ## 🗂️ Projektstruktur
 
@@ -50,8 +60,8 @@ Dieses Repository stellt eine Python-CLI bereit, die Kanten oder binäre Formen 
 ├── README.md
 ├── requirements.txt
 ├── AGENTS.md
-├── AutoAppDev/                      # Git submodule (optional for core CLI)
-├── i18n/                            # Translation directory (currently scaffold/empty)
+├── AutoAppDev/                      # Git-Untermodul (optional für die Kern-CLI)
+├── i18n/                            # Übersetzungsordner (derzeit Gerüst/leer)
 └── scripts/
     ├── extract_pptx_images.py
     ├── render_pptx_slides.py
@@ -81,24 +91,24 @@ Dieses Repository stellt eine Python-CLI bereit, die Kanten oder binäre Formen 
   - `opencv-python`
   - `numpy`
 
-### Optionale PPTX-Helfer
+### Optionale PPTX-Hilfswerkzeuge
 
 - Für `scripts/extract_pptx_images.py`:
   - `python-pptx`
   - `Pillow`
 - Für `scripts/render_pptx_slides.py`:
-  - LibreOffice (`soffice` oder `libreoffice` in `PATH`)
+  - LibreOffice (`soffice` oder `libreoffice` im `PATH`)
   - `PyMuPDF` (`fitz`)
-- Optionales Helper-Setup:
+- Optionale Hilfs-Setups:
   - Conda (für `scripts/setup_conda_env.sh`)
 
-### Optionale erweiterte Pipelines
+### Optionale fortgeschrittene Pipelines
 
-Mehrere Skripte unter `scripts/` hängen von externen Tools/Diensten ab (zum Beispiel `codex` CLI und GRS AI APIs). Diese sind optional und nicht erforderlich, um `aigi2vector.py` auszuführen.
+Mehrere Skripte unter `scripts/` nutzen externe Tools/Services (zum Beispiel die `codex`-CLI und GRS-AI-APIs). Diese sind optional und nicht nötig, um `aigi2vector.py` auszuführen.
 
 ## 🛠️ Installation
 
-### Quick Start (bestehender kanonischer Ablauf)
+### Schneller Start (bestehender kanonischer Ablauf)
 
 ```bash
 python3 -m venv .venv
@@ -108,14 +118,14 @@ pip install -r requirements.txt
 python aigi2vector.py input.png output.svg
 ```
 
-### Optionales Conda-Setup für PPTX-Utilities
+### Optionale Conda-Einrichtung für PPTX-Hilfswerkzeuge
 
 ```bash
 bash scripts/setup_conda_env.sh
 conda activate aigi2vector-pptx
 ```
 
-## ▶️ Nutzung
+## ▶️ Verwendung
 
 ```bash
 python aigi2vector.py <input_image> <output_svg> [options]
@@ -126,51 +136,51 @@ python aigi2vector.py <input_image> <output_svg> [options]
 | Option | Standard | Beschreibung |
 |---|---|---|
 | `--mode edges|binary` | `edges` | Vektorisierungsmodus |
-| `--canny LOW HIGH` | `100 200` | Niedrige/hohe Schwellenwerte für den `edges`-Modus |
-| `--threshold N` | `128` | Binärer Schwellenwert im `binary`-Modus |
-| `--invert` | aus | Schwarz/Weiß vor der Konturerkennung invertieren |
-| `--blur K` | `3` | Kernelgröße für Gaussian Blur (ungerade Ganzzahl) |
+| `--canny LOW HIGH` | `100 200` | Untere/obere Schwellen für den Edges-Modus |
+| `--threshold N` | `128` | Binärer Schwellwert im `binary`-Modus |
+| `--invert` | aus | Schwarz/Weiß vor Konturenerkennung invertieren |
+| `--blur K` | `3` | Kernelgröße für Gaußschen Weichzeichner (ungerade Ganzzahl) |
 | `--epsilon E` | `1.5` | Kurvenvereinfachung; höher = weniger Punkte |
 
-### Funktionsweise der Modi
+### So funktionieren die Modi
 
-- Der Modus `edges` führt Canny-Kantenerkennung aus und traced externe Konturen.
-- Der Modus `binary` thresholdet Graustufenpixel und traced externe Konturen der resultierenden Maske.
+- Im Modus `edges` wird eine Canny-Kantenerkennung ausgeführt und externe Konturen verfolgt.
+- Im Modus `binary` werden Graustufenwerte geschwelligt und externe Konturen der resultierenden Maske verfolgt.
 
 ## ⚙️ Konfiguration
 
-### Tuning der Haupt-CLI-Parameter
+### Haupt-CLI-Parametereinstellungen
 
 - `--canny LOW HIGH`:
   - Niedrigere Werte erfassen mehr Details/Rauschen.
-  - Höhere Werte liefern sauberere, aber potenziell dünnere Konturen.
-- `--threshold` (binary mode):
-  - Ein niedrigerer Schwellenwert behält mehr helle Bereiche als Vordergrund.
-  - Ein höherer Schwellenwert behält überwiegend dunkle/kontrastreiche Bereiche.
+  - Höhere Werte erzeugen sauberere, aber ggf. spärlichere Konturen.
+- `--threshold` (Binary-Modus):
+  - Niedrigere Schwelle behält mehr helle Bereiche als Vordergrund.
+  - Höhere Schwelle behält vor allem dunkle/high-contrast-Bereiche.
 - `--blur`:
-  - Wird intern automatisch auf einen positiven ungeraden Kernel normalisiert.
-  - Größere Werte glätten Rauschen vor der Konturerkennung.
+  - Wird intern automatisch auf eine positive ungerade Kernelgröße normalisiert.
+  - Größere Werte glätten Rauschen vor der Konturenerkennung.
 - `--epsilon`:
   - Größere Werte vereinfachen Pfade aggressiver (weniger Punkte).
-  - Kleinere Werte erhalten mehr Formdetails.
+  - Kleinere Werte erhalten Formdetails.
 
 ### Umgebungsvariablen (erweiterte Skripte)
 
-- `GRSAI` ist für GRS-AI-Extraktionsskripte erforderlich (zum Beispiel `extract_part_grsai.py`, `extract_elements_grsai_pipeline.py`, `extract_elements_from_prompt_json.py`).
+- `GRSAI` wird von GRS-AI-Extraktionsskripten benötigt (z. B. `extract_part_grsai.py`, `extract_elements_grsai_pipeline.py`, `extract_elements_from_prompt_json.py`).
 
-Hinweis zur Annahme: Erweiterte Skripte sind umgebungsspezifisch und in der aktuellen README-Basis teilweise undokumentiert; die folgenden Befehle behalten repository-genaues Verhalten bei, ohne Portabilität über alle Maschinen hinweg zu garantieren.
+Hinweis zur Annahme: Diese fortgeschrittenen Skripte sind umgebungsspezifisch und derzeit teilweise nicht vollständig dokumentiert in der aktuellen README; die untenstehenden Kommandos halten sich am Verhalten des Repositories, ohne plattformübergreifende Portabilität auf jedem Rechner zu garantieren.
 
 ## 🧪 Beispiele
 
 ### Raster zu SVG
 
-Edges (gut für Line Art):
+Kanten (gut für Line Art):
 
 ```bash
 python aigi2vector.py input.png output.svg --mode edges --canny 80 180 --epsilon 2.0
 ```
 
-Binäre Formen (gut für Logos / Flat Art):
+Binärformen (gut für Logos / flache Grafik):
 
 ```bash
 python aigi2vector.py input.png output.svg --mode binary --threshold 140 --invert
@@ -178,33 +188,33 @@ python aigi2vector.py input.png output.svg --mode binary --threshold 140 --inver
 
 ### PPTX-Bildextraktion
 
-Wenn du eingebettete Bilder aus einer `.pptx` extrahieren musst (z. B. ein oder zwei Bilder pro Folie), verwende:
+Wenn du eingebettete Bilder aus einer `.pptx` extrahieren musst (z. B. ein oder zwei Bilder pro Folie), nutze:
 
 ```bash
 bash scripts/setup_conda_env.sh
 conda activate aigi2vector-pptx
-python scripts/extract_pptx_images.py /path/to/file.pptx /path/to/output_dir
+python scripts/extract_pptx_images.py /pfad/zu/datei.pptx /pfad/zu/ausgabe_ordner
 ```
 
-Füge `--dedupe` hinzu, um doppelte Bilder über Folien hinweg zu überspringen. Füge `--png` hinzu, um Dateien als `p{slide}image{index}.png` zu speichern.
+Nutze `--dedupe`, um doppelte Bilder über Folien hinweg zu überspringen. Nutze `--png`, um Dateien als `p{slide}image{index}.png` zu speichern.
 
-### Folien zu Bildern rendern
+### Folien als Bilder rendern
 
-Um jede Folie als `page1.png`, `page2.png`, ... zu rendern, muss LibreOffice (`soffice`) installiert sein:
+Um jede Folie als `page1.png`, `page2.png`, ... zu rendern, installiere LibreOffice (`soffice`):
 
 ```bash
-bash scripts/render_pptx_slides.sh /path/to/file.pptx /path/to/output_dir
+bash scripts/render_pptx_slides.sh /pfad/zu/datei.pptx /pfad/zu/ausgabe_ordner
 ```
 
-Oder verwende den Python-Renderer (nutzt ebenfalls LibreOffice und konvertiert anschließend PDF-Seiten zu PNG):
+Oder nutze den Python-Renderer (verwendet ebenfalls LibreOffice und konvertiert PDF-Seiten anschließend in PNG):
 
 ```bash
-python scripts/render_pptx_slides.py /path/to/file.pptx /path/to/output_dir --dpi 200
+python scripts/render_pptx_slides.py /pfad/zu/datei.pptx /pfad/zu/ausgabe_ordner --dpi 200
 ```
 
-### Optionale erweiterte Workflows (Skripte)
+### Optionale fortgeschrittene Workflows (Skripte)
 
-Diese Skripte sind im Repository vorhanden und können für größere Zerlegungs-/Rekonstruktionspipelines verwendet werden:
+Diese Skripte sind im Repo enthalten und können für größere Zerlegungs-/Rekonstruktions-Pipelines verwendet werden:
 
 - `scripts/run_grsai_three_step.sh`
 - `scripts/codex_describe_images_to_md.sh`
@@ -212,61 +222,67 @@ Diese Skripte sind im Repository vorhanden und können für größere Zerlegungs
 - `scripts/codex_extract_layout_elements_v2.sh`
 - `scripts/run_tikz_prompt_pipeline.sh`
 
-Wichtig: Einige dieser Skripte enthalten aktuell maschinenspezifische absolute Pfade und Abhängigkeiten von externen Diensten; passe sie vor dem Produktiveinsatz an.
+Wichtig: Einige dieser Skripte enthalten aktuell fest verdrahtete, maschinenspezifische absolute Pfade und Abhängigkeiten von externen Diensten; passe sie vor Produktionseinsatz an.
 
-## 🧰 Entwicklungshinweise
+## 🛠️ Entwicklungshinweise
 
-- Die Hauptimplementierung ist eine Single-File-Python-CLI: [`aigi2vector.py`](aigi2vector.py)
-- Funktions-/Variablennamen in `snake_case`, Konstanten in `UPPER_SNAKE_CASE` halten
-- Kleine, testbare Funktionen gegenüber monolithischen Blöcken bevorzugen
-- Aktuell ist keine formale Test-Suite vorhanden
-- `AIGI/` wird von git ignoriert und ist für lokale Assets gedacht
+- Die Hauptimplementierung ist eine CLI in einer einzigen Python-Datei: [`aigi2vector.py`](aigi2vector.py)
+- Halte Funktions-/Variablennamen in `snake_case` und Konstanten in `UPPER_SNAKE_CASE`
+- Bevorzuge kleine, testbare Funktionen gegenüber monolithischen Blöcken
+- Es existiert aktuell keine formale Testsuite
+- `AIGI/` wird von Git ignoriert und ist für lokale Assets vorgesehen
 
 ## 🛟 Fehlerbehebung
 
 - `FileNotFoundError` für Eingabebild/PPTX:
-  - Prüfe, ob der Eingabepfad korrekt ist und gelesen werden kann.
+  - Prüfe, ob der Eingabepfad korrekt und lesbar ist.
 - `Could not read image`:
-  - Prüfe, ob das Dateiformat von OpenCV unterstützt wird und die Datei nicht beschädigt ist.
+  - Bestätige, dass das Bildformat von OpenCV unterstützt wird und die Datei nicht beschädigt ist.
 - Leere oder schlechte SVG-Ausgabe:
-  - Versuche `--mode binary` mit angepasstem `--threshold`.
-  - Passe `--canny`-Schwellenwerte im `edges`-Modus an.
-  - Reduziere `--epsilon`, um mehr Konturpunkte beizubehalten.
-  - Starte mit einem kontrastreicheren Quellbild.
+  - Probiere `--mode binary` mit angepasstem `--threshold`.
+  - Passe die `--canny`-Schwellen im `edges`-Modus an.
+  - Verringere `--epsilon`, um mehr Konturpunkte zu erhalten.
+  - Beginne mit einem kontrastreicheren Quellbild.
 - `LibreOffice (soffice) not found in PATH`:
-  - Installiere LibreOffice und stelle sicher, dass `soffice` oder `libreoffice` in deiner Shell gefunden wird.
-- Fehlende Python-Pakete für Skript-Workflows:
-  - Installiere die benötigten Abhängigkeiten für den jeweiligen Skriptpfad (`python-pptx`, `Pillow`, `PyMuPDF` usw.).
-- GRS-AI-Skripte schlagen mit Auth-Fehlern fehl:
+  - Installiere LibreOffice und stelle sicher, dass `soffice` oder `libreoffice` in deiner Shell auffindbar ist.
+- Fehlende Python-Pakete für Skriptabläufe:
+  - Installiere die erforderlichen Abhängigkeiten für den jeweiligen Skript-Pfad (`python-pptx`, `Pillow`, `PyMuPDF` usw.).
+- GRS-AI-Skripte schlagen bei Authentifizierung fehl:
   - Exportiere deinen Schlüssel, zum Beispiel: `export GRSAI=...`.
 
 ## 🗺️ Roadmap
 
-Potenzielle nächste Verbesserungen:
+Mögliche nächste Verbesserungen:
 
-- Automatisierte Tests unter `tests/` mit deterministischen Beispielbildern hinzufügen
+- Automatisierte Tests unter `tests/` mit deterministischen Beispieldateien hinzufügen
 - Einheitliche optionale Abhängigkeitsgruppen für Skript-Workflows veröffentlichen
-- Portabilität erweiterter Shell-Pipelines verbessern (hartcodierte absolute Pfade entfernen)
-- Referenz-Ein-/Ausgabe-Beispiele unter versionierten Sample-Assets hinzufügen
+- Portabilität fortgeschrittener Shell-Pipelines verbessern (hardcodierte absolute Pfade entfernen)
+- Referenz-Ein-/Ausgabe-Beispiele unter versionierten Beispieldateien ergänzen
 - `i18n/` mit gepflegten übersetzten README-Varianten füllen
 
 ## 🤝 Mitwirken
 
 Beiträge sind willkommen.
 
-Vorgeschlagener Ablauf:
+Empfohlener Ablauf:
 
-1. Forke oder branche vom aktuellen Hauptzweig.
-2. Halte Änderungen fokussiert und nutze kurze, imperative Commit-Messages.
-3. Führe die relevanten von dir geänderten Befehle (CLI/Skriptpfad) aus und verifiziere die Ausgabe.
-4. Aktualisiere README-Nutzungshinweise, wenn sich das Verhalten ändert.
+1. Forke oder erstelle einen Branch vom aktuellen Mainline.
+2. Halte Änderungen fokussiert und verwende kurze, imperative Commit-Nachrichten.
+3. Führe die geänderten CLI-/Skriptpfade mit den relevanten Kommandos aus und prüfe die Ausgabe.
+4. Aktualisiere die README-Nutzungshinweise bei Verhaltensänderungen.
 
-Wenn du Tests hinzufügst, lege sie unter `tests/` ab und benenne Dateien als `test_*.py`.
+Wenn du Tests ergänzt, lege sie unter `tests/` an und benenne Dateien `test_*.py`.
 
 ## 📝 Hinweise
 
-- Die ausgegebene SVG nutzt die Pixelmaße der Eingabe. Skaliere bei Bedarf in deinem Vektoreditor.
-- Für die besten Ergebnisse starte mit einem kontrastreichen Bild.
+- Die Ausgabe-SVG nutzt die Pixelabmessungen des Eingabebildes. Skaliere bei Bedarf in deinem Vektoreditor.
+- Für beste Ergebnisse beginne mit einem hochkontrastigen Bild.
+
+## ❤️ Support
+
+| Donate | PayPal | Stripe |
+|---|---|---|
+| [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
 
 ## License
 

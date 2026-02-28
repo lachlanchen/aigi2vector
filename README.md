@@ -1,6 +1,8 @@
 [English](README.md) · [العربية](i18n/README.ar.md) · [Español](i18n/README.es.md) · [Français](i18n/README.fr.md) · [日本語](i18n/README.ja.md) · [한국어](i18n/README.ko.md) · [Tiếng Việt](i18n/README.vi.md) · [中文 (简体)](i18n/README.zh-Hans.md) · [中文（繁體）](i18n/README.zh-Hant.md) · [Deutsch](i18n/README.de.md) · [Русский](i18n/README.ru.md)
 
 
+[![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
+
 # aigi2vector
 
 [![Python 3](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
@@ -11,6 +13,14 @@
 Convert AI-generated raster images into clean vector plot SVGs.
 
 This repository provides a Python CLI that detects edges or binary shapes in an image and writes them as SVG paths. It is designed for stylized, plotter-friendly vectorization rather than photorealistic tracing.
+
+## 🎯 At a Glance
+
+| Layer | Description | Location |
+|---|---|---|
+| Core CLI | Convert raster images into SVG paths from a single command | [`aigi2vector.py`](aigi2vector.py) |
+| PPTX helpers | Pull slide content and render pages for downstream vectorization | `scripts/` |
+| Optional automation | Larger AI-assisted, extraction, and composition workflows | `AutoAppDev/`, `scripts/` |
 
 ## ✨ Overview
 
@@ -267,6 +277,12 @@ If you add tests, place them under `tests/` and name files `test_*.py`.
 
 - The output SVG uses the input pixel dimensions. Scale in your vector editor if needed.
 - For best results, start with a high-contrast image.
+
+## ❤️ Support
+
+| Donate | PayPal | Stripe |
+|---|---|---|
+| [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
 
 ## License
 
